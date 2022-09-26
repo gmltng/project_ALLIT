@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.prj.edu.dao.QnaDAO">
+
+   <insert id="write" parameterType="hashmap">
+      INSERT INTO qna(qna_date,qna_title,qna_content,mb_id,qna_answer,qna_answer_chk)
+         VALUES(#{qna_date},#{qna_title},#{qna_content},#{mb_id},#{qna_answer},#{qna_answer_chk})
+   </insert>
+
+   <select id="list" resultType="com.prj.edu.dto.QnaDTO">
+      SELECT qna_idx, qna_title, qna_date, mb_id, qna_answer_chk
+      FROM qna ORDER BY qna_idx DESC limit #{param1} offset #{param2}
+   </select>
+   
+   <select id="usqnalist" resultType="com.prj.edu.dto.QnaDTO">
+      SELECT qna_idx, qna_title, qna_date, qna_answer_chk
+      FROM qna WHERE mb_id = #{param3} ORDER BY qna_idx DESC limit #{param1} offset #{param2}
+   </select>
+   
+   <select id="allCount" resultType="int">
+      SELECT COUNT(qna_idx) FROM qna
+   </select>
+   
+   <select id="detail" parameterType="String" resultType="com.prj.edu.dto.QnaDTO">
+      SELECT qna_idx, mb_id, qna_date, qna_title, qna_content, qna_answer_id, qna_answer_date, qna_answer FROM qna WHERE qna_idx = #{qna_idx}
+   </select>
+   
+   <select id="detailform" parameterType="hashmap" resultType="String">
+      SELECT * FROM qna WHERE qna_idx = #{qna_idx}
+   </select>
+   
+   <update id="answer" parameterType="hashmap">
+      update qna set qna_answer_id = #{qna_answer_id}, qna_answer=#{qna_answer}, qna_answer_date = #{qna_answer_date}, qna_answer_chk = #{qna_answer_chk} WHERE qna_idx = #{qna_idx}
+   </update>
+   
+   <select id="dbdetail" parameterType="String" resultType="com.prj.edu.dto.QnaDTO">
+      SELECT * FROM qna WHERE qna_idx = #{qna_idx} 
+   </select>
+   <select id="mslist" resultType="com.prj.edu.dto.QnaDTO">
+      SELECT qna_idx, qna_title, mb_id, qna_date, qna_answer_chk FROM qna limit #{param1} offset #{param2}
+   </select>
+   <select id="msCount" resultType="int">
+      SELECT COUNT(qna_idx) FROM qna
+   </select>
+   
+   	 <select id="findCateId" resultType="String">
+	 	SELECT c.category_name FROM mb m, category c WHERE m.mb_id = #{param1} AND m.category_idx = c.category_idx
+	 </select>
+</mapper>

@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.prj.edu.dao.CstDAO">
+
+	<select id="userCategory" resultType="int">
+         select category_idx from mb where mb_id = #{param1}
+   </select>
+   
+   <select id="eduCnt" resultType="int">
+		SELECT 
+			COUNT(cons_open) 
+		FROM 
+			cons 
+		JOIN 
+			recruit 
+		ON 
+			recruit.mb_id = #{parma1} 
+	WHERE 
+			 cons.cons_delete_edu = 'false' AND cons.cons_open = 'false' AND cons.recruit_idx = recruit.recruit_idx
+   </select>
+
+
+   <select id="mbCnt" resultType="int">
+		SELECT 
+			COUNT(cons_open) 
+		FROM 
+			cons 
+		JOIN 
+			recruit 
+		ON 
+			cons.mb_id = #{parma1} 
+	WHERE 
+			 cons.cons_delete_mb = 'false' AND cons.cons_open = 'false' AND cons.recruit_idx = recruit.recruit_idx
+   </select>
+   
+   
+	<!-- 상담 신청 리스트 가져오기 
+	<select id="list" resultType="com.prj.edu.dto.CstDTO">
+		SELECT 
+			cons.cons_idx,
+			cons.cons_open,
+			cons.cons_date,
+			cons.cons_delete_mb,
+			cons.cons_delete_edu,
+			recruit.recruit_title,
+			recruit.recruit_idx,
+			cons.mb_id,
+			recruit.mb_id
+		FROM 
+			cons 
+		JOIN 
+			recruit USING (recruit_idx) WHERE cons.mb_id = #{param3}
+		ORDER BY cons_idx DESC limit #{param1} offset #{param2}
+	</select>
+	
+			SELECT 
+			cons.cons_idx,
+			cons.cons_open,
+			cons.cons_date,
+			cons.cons_delete_mb,
+			cons.cons_delete_edu,
+			recruit.recruit_title,
+			recruit.recruit_idx,
+			cons.mb_id,
+			recruit.mb_id
+		FROM 
+			cons
+		JOIN 
+			recruit USING (recruit_idx) WHERE cons.mb_id = #{param3} AND cons.cons_delete_mb = 'false'
+		ORDER BY cons_idx DESC limit #{param1} offset #{param2}
+		SELECT 
+			cons.cons_idx,
+			cons.cons_open,
+			cons.cons_date,
+			cons.cons_delete_mb,
+			cons.cons_delete_edu,
+			recruit.recruit_title,
+			recruit.recruit_idx,
+			cons.mb_id,
+			edu.edu_name 
+		FROM 
+			cons,
+			recruit,
+			edu
+		WHERE cons.mb_id = #{param3} AND cons.cons_delete_mb = 'false' AND recruit.mb_id = edu.mb_id
+		ORDER BY cons_idx DESC limit #{param1} offset #{param2}
+	-->
+	
+		<select id="mbList" resultType="com.prj.edu.dto.CstDTO">
+			SELECT 
+				edu.edu_name, 
+				cons.cons_idx, 
+				cons.cons_open, 
+				cons.cons_date, 
+				cons.cons_delete_mb, 
+				cons.cons_delete_edu, 
+				cons.mb_id, 
+				recruit.recruit_title, 
+				recruit.recruit_idx 
+				
+			FROM 
+				cons 
+				
+			JOIN 
+				recruit 
+				
+			ON 
+				cons.recruit_idx = recruit.recruit_idx 
+				
+			JOIN 
+				edu 
+				
+			ON 
+				recruit.mb_id = edu.mb_id 
+				
+			WHERE 
+				cons.mb_id = #{param3} AND 
+				cons.cons_delete_mb = 'false' 
+				
+			ORDER BY cons.cons_idx DESC 
+			LIMIT #{param1} 
+			OFFSET #{param2}
+	</select>
+	
+		<select id="eduList" resultType="com.prj.edu.dto.CstDTO">
+		SELECT 
+			cons.cons_idx,
+			cons.cons_open,
+			cons.cons_date,
+			cons.cons_delete_mb,
+			cons.cons_delete_edu,
+			cons.recruit_idx,
+			cons.mb_id, 
+			recruit.recruit_title
+		FROM 
+			cons 
+		JOIN recruit USING(recruit_idx)
+		WHERE 
+			cons.recruit_idx IN (SELECT recruit_idx FROM recruit WHERE recruit.mb_id = #{param3}) AND cons.cons_delete_edu = 'false'
+		ORDER BY cons_idx DESC limit #{param1} offset #{param2}
+	</select>
+	
+<!-- 	<select id="r_idx" resultType="String">
+	 	SELECT recruit.mb_id FROM recruit WHERE recruit_idx = #{param1}
+	 </select>
+	 -->
+	
+	
+	<!-- 상담 신청 리스트 페이징 -->
+	<select id="mbAll" resultType="int">
+		SELECT COUNT(cons_idx) FROM cons WHERE mb_id = #{param1} AND cons_delete_mb = 'false'
+	</select>
+	
+		<!-- 상담 신청 리스트 페이징 -->
+	<select id="eduAll" resultType="int">
+		SELECT COUNT(cons.cons_idx) FROM cons 
+		JOIN recruit ON recruit.recruit_idx = cons.recruit_idx
+		WHERE recruit.mb_id = #{param1} AND cons_delete_edu = 'false'
+	</select>
+
+	<!-- 상담 신청 작성 시 회원정보 불러오기 -->
+	<select id="cstInfo" parameterType="String" resultType="com.prj.edu.dto.CstDTO">
+		SELECT 
+			mb.mb_name,mb.mb_birth,mb.mb_major,mb.mb_tel,mb.mb_email,mb.mb_edu,mb.mb_id,recruit.recruit_idx,recruit.recruit_title 
+		FROM 
+			mb,
+			recruit
+		WHERE mb.mb_id = #{param1} AND recruit_idx= #{param2}
+	</select>
+
+	<!-- 상담 신청 내용 상세보기 -->
+	<select id="cstDetail" parameterType="String" resultType="com.prj.edu.dto.CstDTO">
+		SELECT 
+			mb.mb_name,
+			mb.mb_birth,
+			mb.mb_major,
+			mb.mb_tel,
+			mb.mb_email,
+			mb.mb_edu,
+			mb.mb_id,
+			cons.cons_content,
+			recruit.recruit_title,
+			recruit.recruit_idx
+		FROM 
+			cons,
+			mb,
+			recruit
+		WHERE cons.cons_idx = #{param1} AND mb.mb_id = cons.mb_id AND recruit.recruit_idx =cons.recruit_idx
+	</select>
+	
+	
+	<!-- 상담 신청 하기(교육과정명은 아직 미완료)  -->
+	<insert id="cstWrite" parameterType="hashmap" >
+		INSERT INTO cons(mb_id,cons_date,cons_content,recruit_idx)
+			VALUES (#{mb_id},CURDATE(),#{cons_content},#{recruit_idx})
+	</insert>
+
+	<!-- 상담 신청 상세보기하면 열람으로 변경 -->
+	<update id="open">
+		UPDATE cons SET cons_open = true 
+			WHERE cons_idx = #{param1}
+	</update>
+
+	
+	<update id="mbDel">
+		UPDATE cons SET cons_delete_mb = 1  WHERE cons_idx = #{cons_idx}
+	</update>
+
+	<update id="eduDel">
+		UPDATE cons SET cons_delete_edu = 1  WHERE cons_idx = #{cons_idx}
+	</update>
+
+ 
+	<!-- 상담 신청 삭제 여부 
+	<update id="cstDelete" parameterType="hashmap">
+		UPDATE cons SET
+		cons_delete_edu = #{cons_delete_edu},
+		cons_delete_mb = #{cons_delete_mb}
+		WHERE 
+		
+	</update>
+	-->
+
+
+
+	
+<!-- 위의 구문까지는 실행됨 근데 교육과정명을 불러와야한다..!!!!!!!! -->
+
+
+
+
+
+
+
+
+
+
+	
+
+</mapper>

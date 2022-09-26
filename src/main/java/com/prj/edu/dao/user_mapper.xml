@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.prj.edu.dao.UserDAO">
+   <select id="login" resultType="String">
+      SELECT mb_id FROM mb WHERE mb_id = #{param1} AND mb_pass = #{param2}
+   </select>
+   <insert id="join" parameterType="hashmap">
+      INSERT INTO
+      mb(mb_id,mb_pass,mb_name,mb_postcode,mb_basic_addr,mb_detail_addr,mb_email,
+      mb_tel,mb_gender,mb_birth,mb_major,mb_edu,mb_status,mb_stopcnt,category_idx)
+      VALUES(#{mb_id},#{mb_pass},#{mb_name},#{mb_postcode},#{mb_basic_addr},#{mb_detail_addr},#{mb_email},#{mb_tel},
+      #{mb_gender},#{mb_birth},#{mb_major},#{mb_edu},#{mb_status},#{mb_stopcnt},#{category_idx})
+   </insert>
+   <select id="idsearch" resultType="String">
+      SELECT mb_id FROM mb WHERE mb_email = #{param1} AND mb_tel = #{param2}
+   </select>
+
+   <select id="pwsearch" resultType="String">
+      SELECT mb_pass FROM mb WHERE mb_id = #{param1} AND mb_email = #{param2} AND
+      mb_tel = #{param3}
+   </select>
+   <update id="newpass">
+      UPDATE mb SET mb_pass = #{param1}
+   </update>
+
+   <select id="overlay" parameterType="String" resultType="String">
+      SELECT mb_id FROM mb WHERE mb_id = #{chkId}
+   </select>
+   <update id="cnt">
+      UPDATE mb SET mb_status=#{param2} WHERE mb_id=#{param1}
+   </update>
+   
+	<select id="list" resultType="com.prj.edu.dto.UserDTO">
+      SELECT mb_id, mb_name, category_idx
+      FROM mb WHERE category_idx = 1 limit #{param1} offset #{param2}
+   </select>
+   
+   <select id="eduCount" resultType="int">
+      SELECT COUNT(edu_idx) FROM edu WHERE mb_id in (select (mb_id) from mb where category_idx = 2)
+   </select>
+   <select id="edulist" resultType="com.prj.edu.dto.UserDTO">
+      SELECT mb_id, edu_name
+      FROM edu WHERE mb_id in (select (mb_id) from mb where category_idx = 2) limit #{param1} offset #{param2}
+   </select>
+   <select id="allCount" resultType="int">
+      SELECT COUNT(mb_id) FROM mb WHERE category_idx = 1
+   </select>
+   <select id="userDetail" parameterType="String"
+      resultType="com.prj.edu.dto.UserDTO">
+      SELECT mb_id, mb_name, mb_basic_addr, mb_postcode,
+     mb_gender, mb_tel, mb_birth, mb_major, mb_edu, category_idx, mb_status,mb_stopcnt
+     FROM mb 
+      WHERE mb_id=#{param1};  
+   </select>
+   <select id="eduDetail" parameterType="String"
+      resultType="com.prj.edu.dto.UserDTO">
+      SELECT m.mb_id, e.rep_name, m.mb_basic_addr, m.mb_postcode,
+      m.mb_tel, e.edu_name FROM mb m, edu e WHERE m.mb_id=#{mb_id} AND e.mb_id=#{mb_id}
+   </select>
+   <select id="userInfo" parameterType="String"
+      resultType="com.prj.edu.dto.UserDTO">
+      SELECT mb_id, mb_name, mb_pass, mb_basic_addr, mb_detail_addr, mb_postcode,
+      mb_gender, mb_major, mb_birth, mb_edu, mb_email, mb_tel FROM mb
+      WHERE mb_id=#{id}
+   </select>
+   <update id="delete">
+      UPDATE mb SET category_idx=5 where mb_id=#{mb_id}
+   </update>
+   
+	<select id="eduInfo" parameterType="String"
+      resultType="com.prj.edu.dto.UserDTO">
+      SELECT m.mb_id, e.rep_name, m.mb_pass, m.mb_tel, m.mb_email, m.mb_detail_addr, m.mb_basic_addr,
+      m.mb_postcode, e.edu_name FROM mb m, edu e
+      WHERE m.mb_id=#{id} AND e.mb_id=#{id} 
+   </select>
+   
+   <!-- 사업자 사진 -->
+   <select id="EduPhotoList" parameterType="String" resultType="com.prj.edu.dto.EduDTO">
+      SELECT photo_name FROM edu WHERE mb_id = #{param1}   
+   </select>
+   
+   <update id="userupdate" parameterType="hashmap">
+         UPDATE mb SET mb_pass = #{mb_pass}, mb_basic_addr = #{mb_basic_addr}, mb_detail_addr = #{mb_detail_addr}, 
+         mb_postcode = #{mb_postcode}, mb_gender = #{mb_gender}, mb_major = #{mb_major}, mb_birth = #{mb_birth}, 
+         mb_edu = #{mb_edu}, mb_email = #{mb_email}, mb_tel = #{mb_tel} WHERE mb_id = #{mb_id}
+   </update>
+   <select id="userCategory" resultType="int">
+         select category_idx from mb where mb_id = #{param1}
+   </select>
+   <select id="blackList" resultType="com.prj.edu.dto.UserDTO">
+      SELECT s.stop_idx, s.stop_reason, s.stop_start, s.stop_end, s.stop_manager,
+         m.mb_id, m.mb_name FROM stop s JOIN mb m USING (mb_id) LIMIT #{param1} OFFSET #{param2}
+   </select>
+   <select id="blackCount" resultType="int">
+      SELECT COUNT(stop_idx) FROM stop
+   </select>
+   <insert id="userStop" parameterType="hashmap">
+      INSERT INTO stop(stop_reason,stop_start,stop_end,stop_manager,mb_id)
+         VALUES(#{stop_reason},#{stop_start},#{stop_end},#{stop_manager},#{mb_id})
+   </insert>
+   <update id="mbStop" parameterType="hashmap">
+         UPDATE mb SET mb_status=#{mb_status}, mb_stopcnt=#{mb_stopcnt} WHERE mb_id = #{mb_id}
+   </update>
+   <select id="stopdate" resultType="String">
+      SELECT max(stop_end) FROM stop WHERE mb_id= #{param1}
+   </select>
+   <select id="userdto" parameterType="String" resultType="com.prj.edu.dto.UserDTO">
+      SELECT mb_id, mb_pass, mb_name, mb_postcode, mb_basic_addr, mb_detail_addr, mb_email, 
+         mb_tel, mb_gender, mb_birth, mb_major, mb_edu, mb_status, mb_stopcnt, category_idx 
+            FROM mb WHERE mb_id = #{param1}
+   </select>
+   <update id="cate">
+      UPDATE mb SET category_idx=#{param2} WHERE mb_id=#{param1}
+   </update>
+   <select id="usallCount" resultType="int">
+      SELECT COUNT(qna_idx) FROM qna WHERE mb_id = #{param1}
+   </select>
+   
+   <insert id="EduJoin" parameterType="hashmap">
+      INSERT INTO
+      mb(mb_id,mb_pass,mb_name,mb_postcode,mb_basic_addr,mb_detail_addr,mb_email,
+      mb_tel,mb_gender,mb_birth,mb_major,mb_edu,mb_status,mb_stopcnt,category_idx)
+      VALUES(#{mb_id},#{mb_pass},#{mb_name},#{mb_postcode},#{mb_basic_addr},#{mb_detail_addr},#{mb_email},#{mb_tel},
+      #{mb_gender},#{mb_birth},#{mb_major},#{mb_edu},'0','0','2')
+   </insert>
+
+   <insert id="EduJoin2" parameterType="com.prj.edu.dto.EduDTO">      
+      INSERT INTO edu (rep_name,edu_name, mb_id, photo_name)
+      VALUES(#{rep_name},#{edu_name},#{mb_id}, #{photo_name} )
+   </insert>
+   
+   <update id="eduupdate" parameterType="hashmap">
+      UPDATE mb m, edu e SET m.mb_id = #{mb_id}, e.rep_name #{rep_name}, m.mb_pass= #{mb_pass}, m.mb_tel = #{mb_tel}, m.mb_email = #{mb_email}, m.mb_detail_addr = #{mb_detail_addr}, m.mb_basic_addr = #{mb_basic_addr},
+      m.mb_postcode = #{mb_postcode}, e.edu_name = #{edu_name} WHERE m.mb_id = #{mb_id} AND e.mb_id = #{mb_id} 
+   </update>
+   
+   
+</mapper>

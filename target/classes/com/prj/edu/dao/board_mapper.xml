@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.prj.edu.dao.BoardDAO">
+
+   <select id="list" resultType="com.prj.edu.dto.BoardDTO">
+      SELECT
+      board_idx,board_title,mb_id,board_content,board_date,board_hits FROM
+      board WHERE board_category = #{param3}
+      ORDER BY board_idx DESC limit #{param1} offset #{param2}
+   </select>
+
+   <select id="allCount" parameterType="String" resultType="int">
+      SELECT
+      COUNT(board_idx) FROM board WHERE board_category = #{board_category}
+   </select>
+
+<!-- 	<select id="boarddetail" parameterType="String"
+		resultType="com.prj.edu.dto.BoardDTO">
+		SELECT b.board_idx,
+		b.board_hits,b.board_date,b.mb_id,b.board_title,b.board_content,b.board_blind, r.report_idx, r.report_state FROM board b, report r 
+		WHERE b.board_idx = #{board_idx} AND r.board_idx = #{board_idx}
+	</select> -->
+	
+ 	<select id="boarddetail" parameterType="String"
+		resultType="com.prj.edu.dto.BoardDTO">
+		SELECT board_idx,
+		board_hits,board_date,mb_id,board_title,board_content,board_blind FROM board b WHERE
+		board_idx = #{board_idx}
+	</select>
+
+	<select id="reportList" resultType="com.prj.edu.dto.BoardDTO"> <!-- 김동훈 추가 -->
+		SELECT
+			b.board_idx, 
+			b.board_title,
+			r.mb_id,
+			r.report_state,
+			r.report_date,
+			r.report_reason,
+			r.report_idx
+		FROM report r INNER JOIN board b ON r.board_idx = b.board_idx 
+		limit #{param1} offset #{param2}
+
+	</select>
+	<select id="reportCount" resultType="int"> <!-- 김동훈 추가 -->
+		SELECT COUNT(report_idx)
+		FROM report
+	</select>
+	
+	<update id="blind"> <!-- 김동훈 추가 -->
+		UPDATE board SET board_blind = if(#{param2} = "do", '1', '0') WHERE board_idx = #{param1}
+	</update>
+	
+<!-- 	<update id="report_state"> 김동훈 추가
+		UPDATE report SET report_state = #{param2} WHERE report_idx = #{param1}
+	</update> -->
+	<!--  0701 동훈 수정본 
+	<select id="boarddetail" parameterType="String"
+      resultType="com.prj.edu.dto.BoardDTO">
+      SELECT b.board_idx,
+      b.board_hits,b.board_date,b.mb_id,b.board_title,b.board_content,b.board_blind, r.report_idx, r.report_state FROM board b, report r WHERE
+      b.board_idx = #{board_idx} AND r.board_idx = #{board_idx}
+   </select> -->
+	
+	<insert id="write" parameterType="hashmap">
+ 		INSERT INTO board(mb_id,board_title,board_content,board_date,board_category,board_blind)
+ 		VALUES (#{mb_id},#{board_title},#{board_content},#{board_date},#{board_category},#{board_blind})
+   </insert>
+   
+   <update id="board_update" parameterType="hashmap">
+   		UPDATE board SET 
+   			board_title = #{board_title}
+   			,board_content = #{board_content}
+   			WHERE board_idx = #{board_idx}
+   </update>
+   
+   <update id="board_hits" parameterType="String">
+		UPDATE board SET board_hits = board_hits+1 WHERE board_idx =#{board_idx}
+	</update>
+	
+	<select id="writerId" parameterType="String" resultType="String">
+		SELECT mb_id FROM board WHERE mb_id = #{mb_id}
+	
+	</select>
+	
+	<select id="cmtlist" parameterType="String" resultType="com.prj.edu.dto.CmtDTO">
+		SELECT cmt_idx, cmt_content, cmt_date, mb_id, board_idx FROM cmt WHERE board_idx = #{board_idx}
+	</select>
+	
+	<insert id="cmtwrite" parameterType="hashmap">	
+		INSERT INTO cmt(cmt_content,cmt_date,mb_id,board_idx)
+			VALUES (#{cmt_content},CURDATE(),#{mb_id},#{board_idx})
+	</insert>
+	
+	<delete id="cmtdel">
+		DELETE FROM cmt WHERE mb_id = #{param2} AND cmt_idx = #{param1}
+	</delete>
+	
+	<select id="report_reason" parameterType="String" resultType="com.prj.edu.dto.ReportDTO">
+		INSERT INTO report (report_idx,report_reason,report_date,report_state,mb_id,board_idx)
+			VALUES(#{report_idx},#{report_reason},CURDATE(),#{report_state},#{mb_id},#{board_idx})
+	</select>
+	
+	<delete id="board_del" parameterType="String">
+		DELETE FROM board WHERE board_idx = #{board_idx}
+	</delete>
+	
+	<delete id="cmt_del" parameterType="String">
+		DELETE FROM cmt where board_idx = #{board_idx}
+	</delete>
+	
+	<delete id="report_del" parameterType="String">
+		DELETE FROM report where board_idx = #{board_idx}
+	</delete>
+	
+	<select id="chkId" parameterType="String" resultType="String">
+		SELECT mb_id FROM board WHERE board_idx  = #{board_idx}
+	</select>
+	
+	<select id="sm_msg_send" parameterType="String" resultType="com.prj.edu.dto.MsgDTO">
+		INSERT INTO msg (msg_content,msg_receive_date,msg_send_date,sender_id,receiver_id)
+			VALUES(#{msg_content},CURDATE(),CURDATE(),#{sender_id},#{receiver_id})
+	</select>
+	
+	<select id="board_cateId" resultType="String">
+		SELECT c.category_name FROM mb m, category c WHERE m.mb_id = #{param1} AND m.category_idx = c.category_idx
+	</select>
+	
+	<select id="chk_blind" parameterType="String" resultType="String"> <!-- 김동훈 추가 -->
+		SELECT board_blind FROM board WHERE board_idx = #{board_idx}
+	</select>
+	
+	<select id="cateId" parameterType="String" resultType="String"> <!-- 김동훈 추가 -->
+		SELECT c.category_name FROM category c, mb m WHERE m.mb_id = #{id} AND m.category_idx = c.category_idx
+	</select>
+
+	
+	<!-- 성민 보드히스토리 추가 -->
+	<select id="boardHistoryajax" resultType="com.prj.edu.dto.BoardDTO">
+      SELECT board_idx, board_title, board_hits, board_date FROM board 
+      	WHERE mb_id = #{param3}
+       ORDER BY board_idx DESC limit #{param1} offset #{param2}
+   </select>
+   
+   <select id="bht_allCount" resultType="int" parameterType="String">
+      SELECT COUNT(board_idx) FROM board WHERE mb_id = #{name}
+   </select>
+   
+</mapper>

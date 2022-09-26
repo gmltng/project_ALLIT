@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.prj.edu.dao.RecruitDAO">
+
+   <select id="list" resultType="com.prj.edu.dto.BoardDTO">
+	   	SELECT 
+	   		r.recruit_idx 
+	   		,r.recruit_title 
+	   		,r.recruit_close 
+	   		,r.recruit_hits 
+	   		,e.edu_name 
+	   		,r.recruit_start
+	   		,r.recruit_end
+	   		,r.recruit_period_sta
+	   		,r.recruit_period_end
+	   		,m.mb_basic_addr
+	   		,(select count(cart_idx) as cnt from cart where recruit_idx = r.recruit_idx and mb_id = #{param4}) as cnt
+	   	FROM 
+	   		recruit r 
+	   		, edu e 
+	   		, mb m  
+	   	WHERE 
+	   		e.mb_id = r.mb_id 
+	   		AND m.mb_id = r.mb_id
+	   		AND r.recruit_field = #{param3}
+	   	
+	   	ORDER BY recruit_idx DESC limit #{param1} offset #{param2}
+   </select>
+   
+   <select id="list1" resultType="com.prj.edu.dto.BoardDTO">
+	   	SELECT 
+	   		r.recruit_idx 
+	   		,r.recruit_title 
+	   		,r.recruit_close 
+	   		,r.recruit_hits 
+	   		,e.edu_name 
+	   		,r.recruit_start
+	   		,r.recruit_end
+	   		,r.recruit_period_sta
+	   		,r.recruit_period_end
+	   		,m.mb_basic_addr
+	   		,(select count(cart_idx) as cnt from cart where recruit_idx = r.recruit_idx and mb_id = #{param3}) as cnt
+	   	FROM 
+	   		recruit r 
+	   		, edu e 
+	   		, mb m  
+	   	WHERE 
+	   		e.mb_id = r.mb_id 
+	   		AND m.mb_id = r.mb_id
+	   	
+	   	ORDER BY recruit_idx DESC limit #{param1} offset #{param2}
+   </select>
+
+   <select id="allCount" resultType="int">
+      SELECT COUNT(recruit_idx) FROM recruit WHERE recruit_field = #{recruit_category}
+   </select>
+
+   <select id="allCount1" resultType="int">
+      SELECT COUNT(recruit_idx) FROM recruit
+   </select>
+   
+    <select id="hotList" resultType="com.prj.edu.dto.BoardDTO">
+		SELECT 
+			r.recruit_idx,r.recruit_title
+			,(r.recruit_end - r.recruit_curdate) as dday
+			,e.edu_name
+			,r.recruit_period_sta, r.recruit_period_end
+		FROM 
+			recruit r
+			,edu e 
+		WHERE 
+			recruit_close = 1 AND r.mb_id = e.mb_id ORDER BY recruit_hits DESC LIMIT 4;
+ 	</select>
+   
+   	<select id="writeList" resultType="com.prj.edu.dto.BoardDTO">
+	   	SELECT 
+	   		m.mb_id
+		   	,e.edu_name
+		   	,m.mb_basic_addr
+		   	,m.mb_tel 
+	   	FROM 
+		   	mb m
+		   	,edu e
+		   	,category c
+	   	WHERE
+	   		e.mb_id = #{param1} AND m.mb_id = #{param1} AND m.category_idx = c.category_idx
+	</select>
+	
+	<update id="upHit" parameterType="String">
+ 		UPDATE recruit SET recruit_hits = recruit_hits+1 WHERE recruit_idx = #{recruit_idx}
+ 	</update>
+ 	
+ 	<select id="recruitDetail" parameterType="String" resultType="com.prj.edu.dto.BoardDTO">
+	   	SELECT 
+	   		r.recruit_idx
+	   		,r.recruit_title
+	   		,r.recruit_start 
+	   		,r.recruit_end 
+	   		,r.recruit_period_sta 
+	   		,r.recruit_period_end 
+	   		,r.mb_id
+	   		,r.recruit_link
+	   		,r.recruit_content
+	   		,r.recruit_field
+	   		,r.recruit_close
+	   		,m.mb_basic_addr
+	   		,m.mb_tel
+	   		,e.edu_name
+	   	FROM 
+	   		recruit r 
+	   		, edu e 
+	   		, mb m  
+	   	
+	   	WHERE 
+	   		r.recruit_idx = #{recruit_idx} 
+	   		AND m.mb_id = r.mb_id
+	   		AND e.mb_id = r.mb_id
+ 	</select>
+ 	
+   <update id="updateDate">
+   		UPDATE recruit SET recruit_curdate = CURDATE()
+   </update>
+   
+   <update id="closeYn">
+   		UPDATE recruit SET recruit_close = if(recruit_end &lt; CURDATE(), '0', '1')
+   		<!-- UPDATE 문에 if를 넣는 구문 > 모집마감일이 오늘날짜보다 전이라면 recruit_close는 0이 된다. 아니면 1. -->
+   		<!-- &lt; = <, &gt; = > -->   
+   </update>
+   
+    <update id="update" parameterType="hashmap">
+	 	UPDATE recruit SET
+	 		recruit_period_sta = #{recruit_period_sta}
+	 		,recruit_period_end = #{recruit_period_end}
+	 		,recruit_title = #{recruit_title}
+	 		,recruit_start = #{recruit_start}
+	 		,recruit_end = #{recruit_end}
+	 		,recruit_link = #{recruit_link}
+	 		,recruit_field = #{recruit_field}
+	 		,recruit_content = #{recruit_content}
+	 	WHERE recruit_idx = #{recruit_idx}
+ 	</update>
+ 	
+ 	<delete id="delete" parameterType="String">
+ 		DELETE FROM recruit WHERE recruit_idx = #{idx}
+ 	</delete>
+ 
+	 <select id="findCateId" resultType="String">
+	 	SELECT c.category_name FROM mb m, category c WHERE m.mb_id = #{param1} AND m.category_idx = c.category_idx
+	 </select>
+	 
+	<select id="allCount2" resultType="int">
+	   SELECT COUNT(recruit_idx) FROM recruit WHERE mb_id = #{param1}
+	</select>
+	
+	   <select id="recruitHistoryList" resultType="com.prj.edu.dto.BoardDTO">
+	   	SELECT 
+	   		r.recruit_idx 
+	   		,r.recruit_title 
+	   		,r.recruit_close 
+	   		,r.recruit_hits 
+	   		,r.recruit_start
+	   		,r.recruit_end
+	   		,r.recruit_date
+	   		,r.recruit_curdate
+	   		,r.mb_id
+	   	FROM 
+	   		recruit r 
+	   	WHERE r.mb_id = #{param3}
+	   	ORDER BY recruit_idx DESC limit #{param1} offset #{param2}
+   </select>
+   
+   <insert id="write" parameterType="hashmap">
+   
+   <selectKey keyProperty="recruit_idx" resultType="String">
+            SELECT LAST_INSERT_ID()
+      </selectKey>
+      
+      
+       INSERT INTO recruit (
+          mb_id
+          ,recruit_title
+          ,recruit_content
+          ,recruit_period_sta
+          ,recruit_period_end
+          ,recruit_start
+          ,recruit_end
+          ,recruit_field
+          ,recruit_link
+       ) VALUES (
+          #{mb_id}
+          ,#{recruit_title}
+          ,#{recruit_content}
+          ,#{recruit_period_sta}
+          ,#{recruit_period_end}
+          ,#{recruit_start}
+          ,#{recruit_end}
+          ,#{recruit_field}
+          ,#{recruit_link}
+       )
+   </insert>
+</mapper>

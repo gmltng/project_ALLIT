@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="com.prj.edu.dao.CartDAO">
+
+<update id="closeYn">
+   		UPDATE recruit SET recruit_close = if(recruit_end &lt; CURDATE(), '0', '1')
+   		<!-- UPDATE 문에 if를 넣는 구문 > 모집마감일이 오늘날짜보다 전이라면 recruit_close는 0이 된다. 아니면 1. -->
+   		<!-- &lt; = <, &gt; = > -->   
+</update>
+
+<select id="allCount" resultType="int">
+	SELECT COUNT(c.cart_idx) FROM cart c WHERE c.mb_id = #{param1};
+</select>
+	
+<!-- 찜 리스트 확인 -->
+<select id="cartList" resultType="com.prj.edu.dto.CartDTO">
+
+	SELECT 
+	  e.edu_name
+	  ,c.cart_idx
+	  ,c.mb_id
+	  ,c.cart_date
+	  ,r.recruit_title
+	  ,r.recruit_close
+	  ,r.recruit_idx
+	  ,r.recruit_period_sta
+	  ,r.recruit_period_end
+	FROM
+	  cart c
+	  ,recruit r
+	  ,edu e
+	WHERE 
+	  c.mb_id = #{param3} AND
+	   e.mb_id = r.mb_id AND
+	    c.recruit_idx = r.recruit_idx
+    ORDER BY recruit_idx DESC limit #{param1} offset #{param2}
+</select>
+
+<!--  찜 삭제 -->
+<delete id="cartDel" parameterType="String">
+		delete from cart where cart_idx = #{cart_idx}	
+</delete>
+
+
+<!--  찜하기 -->
+<insert id="addcart">
+ insert into cart (mb_id, recruit_idx) values (#{mb_id}, #{recruit_idx})
+</insert>
+
+
+<!-- 찜 체크 -->
+<select id="checkcart" resultType="String">
+ 	SELECT cart_idx from cart where recruit_idx = #{recruit_idx} and mb_id = #{mb_id}
+</select>
+
+	
+</mapper>

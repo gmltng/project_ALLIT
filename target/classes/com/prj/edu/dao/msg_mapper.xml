@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	
+<mapper namespace="com.prj.edu.dao.MsgDAO">
+	
+	
+	<select id="msgsendlist" resultType="com.prj.edu.dto.MsgDTO">
+		SELECT msg_idx, sender_id, receiver_id, msg_content, msg_send_date, msg_delete_sender, msg_open 
+		FROM msg WHERE sender_id = #{param3} and msg_delete_sender = 0 ORDER BY msg_idx DESC limit #{param1} offset #{param2}
+	</select>
+	
+	<select id="msgreceivelist" resultType="com.prj.edu.dto.MsgDTO">
+      SELECT msg_idx, sender_id, receiver_id, msg_content, msg_receive_date, msg_send_date, msg_delete_receiver, msg_delete_sender, msg_open 
+      FROM msg WHERE receiver_id = #{param3} and msg_delete_receiver = 0 ORDER BY msg_idx DESC limit #{param1} offset #{param2}
+   </select>
+	
+	<select id="sendallCount" resultType="int">
+		SELECT COUNT(msg_idx) FROM msg WHERE sender_id = #{param1} and msg_delete_sender = 0
+	</select>
+	
+	<select id="receiveallCount" resultType="int">
+		SELECT COUNT(msg_idx) FROM msg WHERE receiver_id = #{param1} and msg_delete_receiver = 0
+	</select>
+	
+	<update id="senddelete">
+		UPDATE msg SET msg_delete_sender = 1  WHERE msg_idx = #{msg_idx}
+	</update>
+	
+	<update id="receivedelete">
+		UPDATE msg SET msg_delete_receiver = 1  WHERE msg_idx = #{msg_idx}
+	</update>
+	
+	<select id="msgdetail" parameterType="String" resultType="com.prj.edu.dto.MsgDTO">
+		SELECT msg_idx, receiver_id, sender_id, msg_content FROM msg WHERE msg_idx = #{msg_idx}
+	</select>
+	
+	<insert id="send" parameterType="hashmap">
+		INSERT INTO msg (sender_id, receiver_id, msg_content, msg_send_date, msg_receive_date)
+			VALUES (#{sender_id}, #{receiver_id}, #{msg_content}, now(), now())
+	</insert>
+	
+	<select id="sendForm" parameterType="String" resultType="com.prj.edu.dto.MsgDTO">
+		SELECT sender_id FROM msg WHERE msg_idx = #{msg_idx}
+	</select>
+	
+	<update id="open">
+		UPDATE msg SET msg_open = 1 WHERE msg_idx = #{msg_idx} 
+	</update>
+	
+	<select id="opentest" parameterType="hashmap" resultType="com.prj.edu.dto.MsgDTO">
+		SELECT msg_idx, sender_id, receiver_id, msg_content, msg_receive_date, msg_send_date, msg_delete_receiver, msg_delete_sender, msg_open FROM msg WHERE msg_open = #{msg_open}
+	</select>
+	
+	<select id="msgcnt" resultType="int">
+		SELECT COUNT(msg_idx) FROM msg WHERE receiver_id = #{param1} and msg_open = 0
+	</select>
+	
+	<update id="msgopen" parameterType="String">
+      UPDATE msg SET msg_open = 1 WHERE msg_idx = #{msg_idx}
+   </update>
+
+	
+</mapper>

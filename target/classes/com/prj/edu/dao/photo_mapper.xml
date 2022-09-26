@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	
+	<mapper namespace="com.prj.edu.dao.PhotoDAO">
+	
+	<!-- 상세보기 사진 -->
+   <select id="photoList" parameterType="String" resultType="com.prj.edu.dto.PhotoDTO">
+      SELECT * FROM photos WHERE recruit_idx = #{recruit_idx}   
+   </select>
+   
+   <!-- 사진 저장 -->
+   <insert id="photoSave">      
+      INSERT INTO photos(photo_original, photo_copy, recruit_idx)
+         VALUES(#{param1},#{param2},#{param3} )   
+   </insert>
+	
+	
+	</mapper>
+	
+	
